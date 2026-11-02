@@ -1,0 +1,29 @@
+name: Build badvpn-udpgw
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    # ubuntu-22.04 uses an older glibc version to ensure maximum compatibility with your VPS
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake make gcc
+
+      - name: Clone and build badvpn
+        run: |
+          git clone --depth 1 https://github.com/ambrop72/badvpn.git
+          mkdir badvpn/build
+          cd badvpn/build
+          cmake .. -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_UDPGW=1
+          make badvpn-udpgw
+
+      - name: Upload badvpn-udpgw binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: badvpn-udpgw-linux-x86_64
+          path: badvpn/build/udpgw/badvpn-udpgw
